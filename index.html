@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>圣诞快乐</title>
+    <title>CH-Love.online - 爱的圣诞树</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 
@@ -55,20 +55,101 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* 标题样式 */
-        h1 { 
-            color: #fceea7; font-size: 8vw; 
+        /* 艺术字标题样式 */
+        .main-title { 
+            font-size: 7vw; 
             max-width: 90%;
-            margin: 0; font-weight: 400; 
-            letter-spacing: 6px; 
-            text-shadow: 0 0 50px rgba(252, 238, 167, 0.6); 
-            background: linear-gradient(to bottom, #fff, #eebb66);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin: 0; 
+            font-weight: 700; 
+            letter-spacing: 8px; 
+            text-align: center; 
+            pointer-events: none;
             font-family: 'Cinzel', 'Times New Roman', serif;
-            opacity: 0.9; transition: opacity 0.5s ease;
-            text-align: center; pointer-events: none;
+            
+            /* 豪华渐变效果 */
+            background: linear-gradient(45deg, 
+                #ffd700 0%,     /* 金色 */
+                #ffed4e 15%,    /* 亮金色 */
+                #ffffff 30%,    /* 白色 */
+                #ffd700 45%,    /* 金色 */
+                #ff6b35 60%,    /* 橙红色 */
+                #ffd700 75%,    /* 金色 */
+                #ffffff 90%,    /* 白色 */
+                #ffd700 100%    /* 金色 */
+            );
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            
+            /* 多层阴影效果 */
+            text-shadow: 
+                0 0 10px rgba(255, 215, 0, 0.8),
+                0 0 20px rgba(255, 215, 0, 0.6),
+                0 0 30px rgba(255, 215, 0, 0.4),
+                0 0 40px rgba(255, 215, 0, 0.2),
+                2px 2px 4px rgba(0, 0, 0, 0.5);
+            
+            /* 动画效果 */
+            animation: titleGlow 3s ease-in-out infinite alternate,
+                       gradientShift 8s ease-in-out infinite;
+            
+            /* 3D变换 */
+            transform: perspective(500px) rotateX(15deg);
+            transform-style: preserve-3d;
+            
+            opacity: 0.95; 
+            transition: all 0.5s ease;
         }
-        @media (min-width: 768px) { h1 { font-size: 56px; } }
+        
+        .main-title:hover {
+            transform: perspective(500px) rotateX(0deg) scale(1.05);
+            text-shadow: 
+                0 0 15px rgba(255, 215, 0, 1),
+                0 0 25px rgba(255, 215, 0, 0.8),
+                0 0 35px rgba(255, 215, 0, 0.6),
+                0 0 45px rgba(255, 215, 0, 0.4),
+                3px 3px 6px rgba(0, 0, 0, 0.7);
+        }
+        
+        /* 标题动画 */
+        @keyframes titleGlow {
+            0% {
+                text-shadow: 
+                    0 0 10px rgba(255, 215, 0, 0.8),
+                    0 0 20px rgba(255, 215, 0, 0.6),
+                    0 0 30px rgba(255, 215, 0, 0.4),
+                    2px 2px 4px rgba(0, 0, 0, 0.5);
+            }
+            100% {
+                text-shadow: 
+                    0 0 20px rgba(255, 215, 0, 1),
+                    0 0 30px rgba(255, 215, 0, 0.8),
+                    0 0 40px rgba(255, 215, 0, 0.6),
+                    0 0 50px rgba(255, 215, 0, 0.4),
+                    3px 3px 6px rgba(0, 0, 0, 0.7);
+            }
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* 响应式设计 */
+        @media (min-width: 768px) { 
+            .main-title { 
+                font-size: 4.5rem; 
+                letter-spacing: 12px;
+            } 
+        }
+        @media (max-width: 480px) { 
+            .main-title { 
+                font-size: 8vw; 
+                letter-spacing: 4px;
+            } 
+        }
 
         /* 右侧控制按钮组 */
         .controls-wrapper {
@@ -203,6 +284,12 @@
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
     </style>
 
+    <!-- MediaPipe 手势识别 -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
     <script type="importmap">
         {
             "imports": {
@@ -224,10 +311,11 @@
     <div id="canvas-container"></div>
 
     <div id="ui-layer">
-        <h1>圣诞快乐</h1>
+        <h1 class="main-title">CH-Love.online</h1>
         
         <div class="controls-wrapper">
-            <div class="hint-text">操作提示：拖动旋转 | 点击照片聚焦 | 按 'S' 键显示统计</div>
+            <div class="hint-text">操作提示：拖动旋转 | 点击照片聚焦 | 按 'S' 键显示统计<br>
+            手势控制：张开手掌旋转 | 手掌前后移动缩放 | 双击握拳切换灯光</div>
         </div>
 
         <div id="mode-bar">
@@ -261,7 +349,19 @@
         </div>
     </div>
 
-    <div id="debug-info">拖动旋转 • 点击照片聚焦查看</div>
+    <!-- 手势识别相关元素 -->
+    <video id="input_video" style="display: none;" autoplay muted playsinline></video>
+    <canvas id="output_canvas" style="display: none;"></canvas>
+    
+    <!-- 手势状态显示 -->
+    <div id="gesture-status" style="position: absolute; top: 10px; left: 10px; z-index: 50; color: #d4af37; font-size: 12px; background: rgba(0,0,0,0.7); padding: 10px; border-radius: 5px; font-family: monospace;">
+        <div>手势控制: <span id="gesture-enabled">启动中...</span></div>
+        <div>检测状态: <span id="hand-detected">无手势</span></div>
+        <div>当前动作: <span id="current-gesture">无</span></div>
+        <div>灯光模式: <span id="light-mode">日间</span></div>
+    </div>
+
+    <div id="debug-info">拖动旋转 • 点击照片聚焦查看 • 手势控制已启用</div>
 
     <script type="module">
         import * as THREE from 'three';
@@ -331,7 +431,22 @@
             focusIndex: -1, 
             focusTarget: null,
             rotation: { x: 0, y: 0 },
-            touch: { active: false, startX: 0, startY: 0, lastX: 0, lastY: 0 }
+            touch: { active: false, startX: 0, startY: 0, lastX: 0, lastY: 0 },
+            gesture: {
+                enabled: false,
+                handDetected: false,
+                currentGesture: 'none',
+                lastHandPosition: { x: 0, y: 0, z: 0 },
+                rotationSensitivity: 3.0,
+                zoomSensitivity: 50.0,
+                lastTapTime: 0,
+                tapThreshold: 300
+            },
+            lighting: {
+                mode: 'day', // 'day' or 'night'
+                dayLights: [],
+                nightLights: []
+            }
         };
 
         let scene, camera, renderer, composer;
@@ -368,12 +483,242 @@
             setupPostProcessing();
             setupEvents();
             setupTouchAndClick(); 
+            setupGestureRecognition();
             
             const loader = document.getElementById('loader');
             loader.style.opacity = 0;
             setTimeout(() => loader.remove(), 800);
 
             animate();
+        }
+
+        // 手势识别系统
+        function setupGestureRecognition() {
+            const videoElement = document.getElementById('input_video');
+            const canvasElement = document.getElementById('output_canvas');
+            const canvasCtx = canvasElement.getContext('2d');
+
+            function onResults(results) {
+                canvasCtx.save();
+                canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+                canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+
+                if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                    STATE.gesture.handDetected = true;
+                    updateGestureStatus('检测到手势', 'lime');
+                    
+                    const landmarks = results.multiHandLandmarks[0];
+                    processHandGesture(landmarks);
+                } else {
+                    STATE.gesture.handDetected = false;
+                    STATE.gesture.currentGesture = 'none';
+                    updateGestureStatus('无手势', 'orange');
+                }
+                canvasCtx.restore();
+            }
+
+            const hands = new Hands({
+                locateFile: (file) => {
+                    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+                }
+            });
+
+            hands.setOptions({
+                maxNumHands: 1,
+                modelComplexity: 1,
+                minDetectionConfidence: 0.5,
+                minTrackingConfidence: 0.5
+            });
+
+            hands.onResults(onResults);
+
+            const camera = new Camera(videoElement, {
+                onFrame: async () => {
+                    await hands.send({image: videoElement});
+                },
+                width: 640,
+                height: 480
+            });
+
+            camera.start().then(() => {
+                STATE.gesture.enabled = true;
+                updateGestureStatus('已启用', 'lime');
+                document.getElementById('gesture-enabled').textContent = '已启用';
+                document.getElementById('gesture-enabled').style.color = 'lime';
+            }).catch((error) => {
+                console.warn('手势识别启动失败:', error);
+                updateGestureStatus('启动失败', 'red');
+                document.getElementById('gesture-enabled').textContent = '启动失败';
+                document.getElementById('gesture-enabled').style.color = 'red';
+            });
+        }
+
+        function processHandGesture(landmarks) {
+            // 获取手掌中心点 (landmark 9)
+            const palmCenter = landmarks[9];
+            const currentPos = {
+                x: palmCenter.x,
+                y: palmCenter.y,
+                z: palmCenter.z
+            };
+
+            // 检测双击手掌 (通过手掌快速闭合再张开)
+            const thumbTip = landmarks[4];
+            const indexTip = landmarks[8];
+            const middleTip = landmarks[12];
+            const ringTip = landmarks[16];
+            const pinkyTip = landmarks[20];
+            
+            // 计算手指间距离判断是否握拳
+            const palmBase = landmarks[0];
+            const avgFingerDistance = [thumbTip, indexTip, middleTip, ringTip, pinkyTip]
+                .reduce((sum, tip) => {
+                    const dist = Math.sqrt(
+                        Math.pow(tip.x - palmBase.x, 2) + 
+                        Math.pow(tip.y - palmBase.y, 2)
+                    );
+                    return sum + dist;
+                }, 0) / 5;
+
+            const isFist = avgFingerDistance < 0.15;
+            
+            // 双击检测
+            if (isFist) {
+                const currentTime = Date.now();
+                if (currentTime - STATE.gesture.lastTapTime < STATE.gesture.tapThreshold) {
+                    // 双击检测到，切换灯光模式
+                    toggleLightingMode();
+                    STATE.gesture.lastTapTime = 0; // 重置避免连续触发
+                } else {
+                    STATE.gesture.lastTapTime = currentTime;
+                }
+                STATE.gesture.currentGesture = '握拳';
+                updateCurrentGesture('握拳 (双击切换灯光)');
+            } else {
+                // 单手旋转控制
+                if (STATE.gesture.lastHandPosition.x !== 0) {
+                    const deltaX = (currentPos.x - STATE.gesture.lastHandPosition.x) * STATE.gesture.rotationSensitivity;
+                    const deltaY = (currentPos.y - STATE.gesture.lastHandPosition.y) * STATE.gesture.rotationSensitivity;
+                    
+                    STATE.rotation.y += deltaX;
+                    STATE.rotation.x += deltaY;
+                    STATE.rotation.x = Math.max(-0.5, Math.min(0.5, STATE.rotation.x));
+                }
+
+                // 前后移动控制相机距离
+                const deltaZ = currentPos.z - STATE.gesture.lastHandPosition.z;
+                if (Math.abs(deltaZ) > 0.01) {
+                    const zoomDelta = deltaZ * STATE.gesture.zoomSensitivity;
+                    camera.position.z = Math.max(20, Math.min(100, camera.position.z + zoomDelta));
+                }
+
+                STATE.gesture.currentGesture = '张开手掌';
+                updateCurrentGesture('张开手掌 (旋转控制)');
+            }
+
+            // 更新上一次手势位置
+            STATE.gesture.lastHandPosition = currentPos;
+        }
+
+        function toggleLightingMode() {
+            if (STATE.lighting.mode === 'day') {
+                // 切换到夜晚模式
+                STATE.lighting.mode = 'night';
+                setupNightLighting();
+                updateLightModeDisplay('夜晚');
+            } else {
+                // 切换到日间模式
+                STATE.lighting.mode = 'day';
+                setupDayLighting();
+                updateLightModeDisplay('日间');
+            }
+        }
+
+        function setupDayLighting() {
+            // 移除所有现有灯光
+            scene.children = scene.children.filter(child => !(child instanceof THREE.Light));
+            
+            // 重新设置日间灯光
+            const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambient);
+            
+            const innerLight = new THREE.PointLight(0xffaa00, 2, 20);
+            innerLight.position.set(0, 5, 0);
+            mainGroup.add(innerLight);
+            
+            const spotGold = new THREE.SpotLight(0xffcc66, 1200);
+            spotGold.position.set(30, 40, 40);
+            spotGold.angle = 0.5;
+            spotGold.penumbra = 0.5;
+            scene.add(spotGold);
+            
+            const spotBlue = new THREE.SpotLight(0x6688ff, 800);
+            spotBlue.position.set(-30, 20, -30);
+            scene.add(spotBlue);
+            
+            const fill = new THREE.DirectionalLight(0xffeebb, 0.8);
+            fill.position.set(0, 0, 50);
+            scene.add(fill);
+
+            // 更新背景和雾效
+            scene.background = new THREE.Color(0x050d1a);
+            scene.fog = new THREE.FogExp2(0x050d1a, 0.015);
+        }
+
+        function setupNightLighting() {
+            // 移除所有现有灯光
+            scene.children = scene.children.filter(child => !(child instanceof THREE.Light));
+            
+            // 设置夜晚梦幻灯光
+            const ambient = new THREE.AmbientLight(0x2a1810, 0.3);
+            scene.add(ambient);
+            
+            // 主要的暖色调灯光
+            const innerLight = new THREE.PointLight(0xff6600, 3, 25);
+            innerLight.position.set(0, 8, 0);
+            mainGroup.add(innerLight);
+            
+            // 紫色梦幻灯光
+            const spotPurple = new THREE.SpotLight(0x8844ff, 800);
+            spotPurple.position.set(-25, 30, 25);
+            spotPurple.angle = 0.6;
+            spotPurple.penumbra = 0.8;
+            scene.add(spotPurple);
+            
+            // 蓝绿色辅助灯光
+            const spotCyan = new THREE.SpotLight(0x00ffaa, 600);
+            spotCyan.position.set(25, 25, -25);
+            spotCyan.angle = 0.5;
+            spotCyan.penumbra = 0.7;
+            scene.add(spotCyan);
+            
+            // 粉色装饰灯光
+            const spotPink = new THREE.SpotLight(0xff4488, 400);
+            spotPink.position.set(0, -10, 30);
+            spotPink.angle = 0.8;
+            spotPink.penumbra = 0.9;
+            scene.add(spotPink);
+
+            // 更新背景和雾效为更深的夜晚色调
+            scene.background = new THREE.Color(0x0a0520);
+            scene.fog = new THREE.FogExp2(0x0a0520, 0.02);
+        }
+
+        function updateGestureStatus(status, color) {
+            const element = document.getElementById('hand-detected');
+            element.textContent = status;
+            element.style.color = color;
+        }
+
+        function updateCurrentGesture(gesture) {
+            const element = document.getElementById('current-gesture');
+            element.textContent = gesture;
+        }
+
+        function updateLightModeDisplay(mode) {
+            const element = document.getElementById('light-mode');
+            element.textContent = mode;
+            element.style.color = mode === '夜晚' ? '#8844ff' : '#d4af37';
         }
 
         function setupTouchAndClick() {
