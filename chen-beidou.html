@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>北斗守护你的澳门时光 - BDS-3 Analysis</title>
+    <style>
+        :root {
+            /* 黑金配色方案 */
+            --bg-color: #050505;
+            --card-bg: #121212;
+            --card-border: rgba(212, 175, 55, 0.3);
+            
+            --gold-primary: #D4AF37;   /* 香槟金 */
+            --gold-light: #F4C430;     /* 亮金 */
+            --gold-dim: #8a7338;       /* 暗金 */
+            --gold-glow: rgba(212, 175, 55, 0.25);
+            
+            --text-main: #EAEAEA;
+            --text-sub: #888888;
+            
+            /* 卫星颜色 - 宝石色调以配合黑金 */
+            --geo-color: #FF3333;      /* 红宝石 */
+            --igso-color: #00FF88;     /* 祖母绿 */
+            --meo-color: #00AAFF;      /* 蓝宝石 */
+        }
+
+        body {
+            font-family: 'Playfair Display', 'Segoe UI', serif; 
+            background: linear-gradient(180deg, #000000 0%, #1a1a1a 100%);
+            color: var(--text-main);
+            margin: 0;
+            padding: 10px 20px; /* 减小上下padding */
+            min-height: 100vh;
+            overflow-x: hidden;
+            box-sizing: border-box;
+        }
+
+        /* ---------------- 头部设计 (紧凑版) ---------------- */
+        header {
+            text-align: center;
+            margin-bottom: 20px; /* 减小间距 */
+            position: relative;
+            padding-top: 10px;
+        }
+
+        h1 {
+            font-family: 'Cinzel', serif; 
+            font-size: 1.8rem; /* 减小字体 */
+            margin: 0 0 10px 0;
+            letter-spacing: 2px;
+            background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent; 
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            color: var(--text-sub);
+            font-size: 0.9rem; /* 减小字体 */
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.5;
+            font-family: 'Segoe UI', sans-serif;
+            border-top: 1px solid rgba(212, 175, 55, 0.2);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+            padding: 8px 0;
+        }
+
+        .heart-beat {
+            color: var(--gold-primary);
+            display: inline-block;
+            animation: beat 2s infinite ease-in-out;
+            text-shadow: 0 0 10px var(--gold-primary);
+        }
+
+        @keyframes beat {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.3); opacity: 1; }
+        }
+
+        /* ---------------- 布局与卡片 (紧凑版) ---------------- */
+        .container {
+            display: grid;
+            grid-template-columns: 300px 1fr; /* 左侧栏变窄 */
+            gap: 15px; /* 减小间距 */
+            max-width: 100%;
+            margin: 0 auto;
+            height: calc(100vh - 140px); /* 尝试让容器适应屏幕高度 */
+        }
+
+        /* 右侧内容区域改为 Grid 布局 */
+        .main-content {
+            display: grid;
+            grid-template-columns: auto 1fr; /* 第一行两列 */
+            grid-template-rows: auto 1fr;    /* 两行 */
+            gap: 15px;
+            overflow-y: auto; /* 允许内部滚动 */
+        }
+
+        /* 特殊卡片位置 */
+        .card-sky { grid-column: 1 / 2; grid-row: 1 / 2; }
+        .card-chart { grid-column: 2 / 3; grid-row: 1 / 2; }
+        .card-table { grid-column: 1 / 3; grid-row: 2 / 3; }
+
+        @media (max-width: 1100px) {
+            .container { grid-template-columns: 1fr; height: auto; }
+            .main-content { grid-template-columns: 1fr; grid-template-rows: auto; }
+            .card-sky, .card-chart, .card-table { grid-column: 1 / -1; grid-row: auto; }
+            .sidebar { display: flex; flex-wrap: wrap; gap: 15px; }
+            .sidebar .card { flex: 1; min-width: 280px; }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            padding: 15px; /* 减小内边距 */
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.8);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold-primary), transparent);
+        }
+
+        .card-title {
+            font-size: 0.95rem;
+            color: var(--gold-primary);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        /* ---------------- 控件样式 (紧凑版) ---------------- */
+        .controls label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.75rem;
+            color: var(--gold-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        input[type="date"] {
+            width: 100%;
+            padding: 6px;
+            background: #000;
+            border: 1px solid var(--gold-dim);
+            color: var(--gold-primary);
+            font-family: inherit;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+            outline: none;
+            margin-top: 5px;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            background: #000;
+            border: 2px solid var(--gold-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--gold-glow);
+            transition: all 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        button.btn-primary {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #b38728 0%, #fcf6ba 50%, #bf953f 100%);
+            border: none;
+            color: #000;
+            font-size: 0.9rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s;
+            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+            margin-top: 5px;
+        }
+
+        button.btn-primary:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+        }
+
+        /* ---------------- 状态与数据 ---------------- */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+        .metric-item {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            padding: 8px 2px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .metric-val { 
+            font-size: 1rem; 
+            font-weight: bold; 
+            color: var(--text-main);
+            display: block; 
+            margin-bottom: 2px;
+        }
+        .metric-label { 
+            font-size: 0.5rem; 
+            color: var(--gold-dim); 
+            text-transform: uppercase;
+        }
+
+        .status-box {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--gold-dim);
+            padding: 12px;
+            position: relative;
+            margin-top: 5px;
+        }
+        .status-box::before {
+            content: 'STATUS';
+            position: absolute;
+            top: -6px;
+            left: 10px;
+            background: var(--card-bg);
+            padding: 0 5px;
+            font-size: 0.6rem;
+            color: var(--gold-primary);
+        }
+
+        .status-text {
+            font-size: 1rem;
+            color: var(--gold-light);
+            margin-bottom: 5px;
+            font-family: serif;
+        }
+
+        .romantic-note {
+            font-size: 0.8rem;
+            font-style: italic;
+            color: var(--text-sub);
+            border-left: 2px solid var(--gold-dim);
+            padding-left: 8px;
+            margin-top: 8px;
+            line-height: 1.3;
+        }
+
+        /* ---------------- 绘图区优化 ---------------- */
+        canvas {
+            background: #080808;
+            border: 1px solid #222;
+            width: 100%; 
+            display: block;
+        }
+        
+        .chart-container {
+            width: 100%;
+            height: 100%;
+            min-height: 200px;
+            position: relative;
+            flex-grow: 1;
+        }
+
+        .skyplot-container {
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100%;
+            min-height: 280px;
+        }
+
+        /* 表格黑金化 */
+        .table-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--gold-dim) #111;
+            min-height: 150px;
+        }
+        
+        .table-container::-webkit-scrollbar { width: 4px; }
+        .table-container::-webkit-scrollbar-track { background: #111; }
+        .table-container::-webkit-scrollbar-thumb { background: var(--gold-dim); }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            font-family: 'Courier New', monospace; 
+        }
+
+        th {
+            background: #1a1a1a;
+            color: var(--gold-primary);
+            position: sticky;
+            top: 0;
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid var(--gold-dim);
+            text-transform: uppercase;
+            font-size: 0.7rem;
+        }
+
+        td {
+            padding: 6px 8px;
+            border-bottom: 1px solid #222;
+            color: #ccc;
+        }
+
+        tr:hover {
+            background: rgba(212, 175, 55, 0.05);
+        }
+
+        .legend {
+            display: flex;
+            gap: 10px;
+            font-size: 0.65rem;
+            margin-top: 0;
+            justify-content: flex-end;
+            text-transform: uppercase;
+            color: var(--text-sub);
+        }
+        .dot { 
+            width: 6px; 
+            height: 6px; 
+            border-radius: 50%; 
+            display: inline-block; 
+            margin-right: 4px; 
+            box-shadow: 0 0 5px currentColor;
+        }
+
+        /* ---------------- 其他修饰 ---------------- */
+        small { color: #555 !important; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>陈凯壮之北斗守护贺丹丹 · 澳门时光</h1>
+        <div class="subtitle">
+            <span style="color:var(--gold-primary)">★</span> 
+            2025.02 - 05 | 澳门科技大学 (22.15°N, 113.56°E) | 
+            <span style="color:var(--gold-primary)">★</span>
+            &nbsp; "即使相隔千里，这漫天星辰也是最坚定的守护。"
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- 左侧控制面板 (固定宽度) -->
+        <div class="sidebar">
+            <div class="card controls">
+                <div class="card-title">
+                    <span>MISSION CONTROL</span>
+                    <span style="font-size:0.7em; opacity:0.5">V3.0</span>
+                </div>
+                
+                <div class="input-group">
+                    <label>DATE SELECTION</label>
+                    <input type="date" id="datePicker" min="2025-02-01" max="2025-05-31" value="2025-02-14">
+                </div>
+
+                <div class="input-group">
+                    <label>TIME (UTC+8): <span id="timeVal" style="color:var(--gold-light)">12:00</span></label>
+                    <input type="range" id="timeSlider" min="0" max="23" step="1" value="12">
+                </div>
+
+                <div class="input-group">
+                    <label>ELEVATION MASK: <span id="maskVal" style="color:var(--gold-light)">10°</span></label>
+                    <input type="range" id="maskSlider" min="5" max="25" step="1" value="10">
+                    <small>模拟城市天际线遮挡</small>
+                </div>
+
+                <button class="btn-primary" id="calcBtn">UPDATE LINK</button>
+            </div>
+
+            <div class="card">
+                <div class="card-title">LINK STATUS</div>
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <span class="metric-val" id="satCount">-</span>
+                        <span class="metric-label">SAT</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-val" id="pdopVal">-</span>
+                        <span class="metric-label">PDOP</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-val" id="hdopVal">-</span>
+                        <span class="metric-label">HDOP</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-val" id="vdopVal">-</span>
+                        <span class="metric-label">VDOP</span>
+                    </div>
+                </div>
+                <div class="status-box">
+                    <div class="status-text" id="statusTitle">INITIALIZING...</div>
+                    <div class="romantic-note" id="romanticMsg">Establishing connection...</div>
+                </div>
+            </div>
+            
+             <div class="card" style="flex:1">
+                <div class="card-title">TARGET</div>
+                <div style="text-align: center; color: var(--gold-dim); font-size: 0.7rem; font-family: monospace; letter-spacing: 1px;">
+                    M.U.S.T. CAMPUS<br>
+                    LAT: 22.15° N | LON: 113.56° E
+                </div>
+                <canvas id="mapCanvas" width="260" height="100" style="margin-top:10px; border-radius: 4px; height: auto;"></canvas>
+            </div>
+        </div>
+
+        <!-- 右侧可视化 (Grid布局) -->
+        <div class="main-content">
+            <!-- Skyplot (左上) -->
+            <div class="card card-sky">
+                <div class="card-title">
+                    SKYPLOT
+                    <div class="legend">
+                        <span><span class="dot" style="background:var(--geo-color)"></span>GEO</span>
+                        <span><span class="dot" style="background:var(--igso-color)"></span>IGSO</span>
+                        <span><span class="dot" style="background:var(--meo-color)"></span>MEO</span>
+                    </div>
+                </div>
+                <div class="skyplot-container">
+                    <canvas id="skyplot" width="320" height="320" style="width: 280px; height: 280px; border:none; background: radial-gradient(circle, #1a1a1a 0%, #000 70%); border-radius: 50%;"></canvas>
+                </div>
+            </div>
+
+            <!-- Chart (右上) -->
+            <div class="card card-chart">
+                <div class="card-title">24H PREDICTION</div>
+                <div class="chart-container">
+                    <canvas id="timeChart" width="600" height="280"></canvas>
+                </div>
+            </div>
+
+            <!-- Table (下方) -->
+            <div class="card card-table">
+                <div class="card-title">CONSTELLATION TELEMETRY</div>
+                <div class="table-container">
+                    <table id="satTable">
+                        <thead>
+                            <tr>
+                                <th>PRN</th>
+                                <th>ORBIT</th>
+                                <th>AZ (°)</th>
+                                <th>EL (°)</th>
+                                <th>RANGE (KM)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- JS populate -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+/**
+ * 核心逻辑与数学库
+ * 保持不变
+ */
+
+const PI = Math.PI;
+const RAD2DEG = 180.0 / PI;
+const DEG2RAD = PI / 180.0;
+const GM = 3.986004418e14;
+const USER_POS = { lat: 22.15 * DEG2RAD, lon: 113.56 * DEG2RAD, h: 0 };
+
+// --- 数学工具类 ---
+function matMul(A, B) {
+    let result = new Array(A.length).fill(0).map(() => new Array(B[0].length).fill(0));
+    for (let i = 0; i < A.length; i++) {
+        for (let j = 0; j < B[0].length; j++) {
+            for (let k = 0; k < A[0].length; k++) {
+                result[i][j] += A[i][k] * B[k][j];
+            }
+        }
+    }
+    return result;
+}
+function matTrans(A) { return A[0].map((_, colIndex) => A.map(row => row[colIndex])); }
+function matInv4x4(m) {
+    let n = m.length;
+    let mat = m.map(row => [...row]);
+    let id = Array(n).fill(0).map((_, i) => Array(n).fill(0).map((_, j) => i === j ? 1 : 0));
+    for (let i = 0; i < n; i++) {
+        let pivot = mat[i][i];
+        if (Math.abs(pivot) < 1e-10) return null;
+        for (let j = 0; j < n; j++) {
+            mat[i][j] /= pivot;
+            id[i][j] /= pivot;
+        }
+        for (let k = 0; k < n; k++) {
+            if (k !== i) {
+                let factor = mat[k][i];
+                for (let j = 0; j < n; j++) {
+                    mat[k][j] -= factor * mat[i][j];
+                    id[k][j] -= factor * id[i][j];
+                }
+            }
+        }
+    }
+    return id;
+}
+function getJulianDate(date) {
+    let Y = date.getUTCFullYear();
+    let M = date.getUTCMonth() + 1;
+    let D = date.getUTCDate();
+    let H = date.getUTCHours();
+    let min = date.getUTCMinutes();
+    let s = date.getUTCSeconds();
+    if (M <= 2) { Y -= 1; M += 12; }
+    let A = Math.floor(Y / 100);
+    let B = 2 - A + Math.floor(A / 4);
+    let JD = Math.floor(365.25 * (Y + 4716)) + Math.floor(30.6001 * (M + 1)) + D + B - 1524.5;
+    JD += (H * 3600 + min * 60 + s) / 86400.0;
+    return JD;
+}
+function getGMST(jd) {
+    let t = (jd - 2451545.0) / 36525.0;
+    let gmst = 280.46061837 + 360.98564736629 * (jd - 2451545.0) + 0.000387933 * t * t - t * t * t / 38710000.0;
+    gmst = gmst % 360.0;
+    if (gmst < 0) gmst += 360.0;
+    return gmst * DEG2RAD;
+}
+function ecef2enu(r_sat, r_user, lat, lon) {
+    let dx = r_sat[0] - r_user[0];
+    let dy = r_sat[1] - r_user[1];
+    let dz = r_sat[2] - r_user[2];
+    let sinL = Math.sin(lat), cosL = Math.cos(lat), sinA = Math.sin(lon), cosA = Math.cos(lon);
+    let e = -sinA * dx + cosA * dy;
+    let n = -sinL * cosA * dx - sinL * sinA * dy + cosL * dz;
+    let u = cosL * cosA * dx + cosL * sinA * dy + sinL * dz;
+    return { e, n, u };
+}
+function lla2ecef(lat, lon, h) {
+    const a = 6378137.0, f = 1 / 298.257223563;
+    const e2 = 2 * f - f * f;
+    let sinL = Math.sin(lat), cosL = Math.cos(lat), sinA = Math.sin(lon), cosA = Math.cos(lon);
+    let N = a / Math.sqrt(1 - e2 * sinL * sinL);
+    let x = (N + h) * cosL * cosA;
+    let y = (N + h) * cosL * sinA;
+    let z = (N * (1 - e2) + h) * sinL;
+    return [x, y, z];
+}
+
+// --- 卫星类与星座 ---
+class Satellite {
+    constructor(prn, type, a, e, i, Omega0, w, M0) {
+        this.prn = prn; this.type = type; this.a = a; this.e = e; this.i = i * DEG2RAD;
+        this.Omega0 = Omega0 * DEG2RAD; this.w = w * DEG2RAD; this.M0 = M0 * DEG2RAD;
+    }
+    getPosition(t_diff_sec, gmst) {
+        let n = Math.sqrt(GM / Math.pow(this.a, 3));
+        let M = this.M0 + n * t_diff_sec;
+        let E = M;
+        for (let k = 0; k < 10; k++) E = M + this.e * Math.sin(E);
+        let sinNu = (Math.sqrt(1 - this.e * this.e) * Math.sin(E)) / (1 - this.e * Math.cos(E));
+        let cosNu = (Math.cos(E) - this.e) / (1 - this.e * Math.cos(E));
+        let nu = Math.atan2(sinNu, cosNu);
+        let r = this.a * (1 - this.e * Math.cos(E));
+        let u = this.w + nu;
+        let x_prime = r * Math.cos(u), y_prime = r * Math.sin(u);
+        let Omega = this.Omega0 - gmst;
+        if(this.type === 'GEO') {
+             let geo_lon = this.Omega0; 
+             return [this.a * Math.cos(geo_lon) * Math.cos(0), this.a * Math.sin(geo_lon) * Math.cos(0), this.a * Math.sin(0)];
+        }
+        let cosO = Math.cos(Omega), sinO = Math.sin(Omega), cosI = Math.cos(this.i), sinI = Math.sin(this.i);
+        return [x_prime * cosO - y_prime * cosI * sinO, x_prime * sinO + y_prime * cosI * cosO, y_prime * sinI];
+    }
+}
+
+const satellites = [];
+const h_geo = 35786000, a_geo = 42164000;
+satellites.push(new Satellite("C01", "GEO", a_geo, 0, 0, 140, 0, 0));
+satellites.push(new Satellite("C02", "GEO", a_geo, 0, 0, 80, 0, 0));
+satellites.push(new Satellite("C03", "GEO", a_geo, 0, 0, 110.5, 0, 0));
+const a_igso = 42164000;
+satellites.push(new Satellite("C06", "IGSO", a_igso, 0.002, 55, 118, 0, 0));
+satellites.push(new Satellite("C07", "IGSO", a_igso, 0.002, 55, 118, 0, 120));
+satellites.push(new Satellite("C08", "IGSO", a_igso, 0.002, 55, 118, 0, 240));
+const a_meo = 27906000;
+for (let plane = 0; plane < 3; plane++) {
+    let RAAN = plane * 120;
+    for (let slot = 0; slot < 8; slot++) {
+        let prn = 11 + plane * 8 + slot;
+        let M = slot * 45 + plane * 15;
+        satellites.push(new Satellite("C" + prn, "MEO", a_meo, 0.001, 55, RAAN, 0, M));
+    }
+}
+
+function calculateSkyplot(date, maskAngle) {
+    let jd = getJulianDate(date);
+    let gmst = getGMST(jd);
+    let epoch = new Date("2025-01-01T00:00:00Z");
+    let t_diff = (date.getTime() - epoch.getTime()) / 1000.0;
+    let userECEF = lla2ecef(USER_POS.lat, USER_POS.lon, USER_POS.h);
+    let visibleSats = [];
+    satellites.forEach(sat => {
+        let satPos = sat.getPosition(t_diff, gmst);
+        let enu = ecef2enu(satPos, userECEF, USER_POS.lat, USER_POS.lon);
+        let dist = Math.sqrt(enu.e**2 + enu.n**2 + enu.u**2);
+        let el = Math.asin(enu.u / dist) * RAD2DEG;
+        let az = Math.atan2(enu.e, enu.n) * RAD2DEG;
+        if (az < 0) az += 360;
+        if (el >= maskAngle) visibleSats.push({ prn: sat.prn, type: sat.type, az: az, el: el, dist: dist });
+    });
+    return visibleSats;
+}
+
+function calculateDOP(visibleSats) {
+    if (visibleSats.length < 4) return { pdop: 99.9, hdop: 99.9, vdop: 99.9, gdop: 99.9, valid: false };
+    let H = visibleSats.map(sat => {
+        let el = sat.el * DEG2RAD, az = sat.az * DEG2RAD;
+        return [-Math.cos(el) * Math.sin(az), -Math.cos(el) * Math.cos(az), -Math.sin(el), 1];
+    });
+    let HT = matTrans(H), HTH = matMul(HT, H), Q = matInv4x4(HTH);
+    if (!Q) return { pdop: 99.9, valid: false };
+    let qxx = Q[0][0], qyy = Q[1][1], qzz = Q[2][2], qtt = Q[3][3];
+    return { pdop: Math.sqrt(qxx + qyy + qzz), hdop: Math.sqrt(qxx + qyy), vdop: Math.sqrt(qzz), gdop: Math.sqrt(qxx + qyy + qzz + qtt), valid: true };
+}
+
+// --- 绘图与UI更新 ---
+
+const canvasSky = document.getElementById('skyplot');
+const ctxSky = canvasSky.getContext('2d');
+const canvasChart = document.getElementById('timeChart');
+const ctxChart = canvasChart.getContext('2d');
+const canvasMap = document.getElementById('mapCanvas');
+const ctxMap = canvasMap.getContext('2d');
+
+function drawSkyplot(sats) {
+    let w = canvasSky.width;
+    let h = canvasSky.height;
+    let cx = w / 2;
+    let cy = h / 2;
+    let r = Math.min(cx, cy) - 20;
+
+    ctxSky.clearRect(0, 0, w, h);
+    
+    // 极坐标网格 - 暗金色
+    ctxSky.strokeStyle = "#444";
+    ctxSky.lineWidth = 1;
+    ctxSky.beginPath();
+    [0, 30, 60].forEach(el => {
+        let radius = r * (90 - el) / 90;
+        ctxSky.moveTo(cx + radius, cy);
+        ctxSky.arc(cx, cy, radius, 0, 2*PI);
+    });
+    ctxSky.stroke();
+    
+    // 十字线
+    ctxSky.strokeStyle = "rgba(212, 175, 55, 0.3)";
+    ctxSky.beginPath();
+    ctxSky.moveTo(cx - r, cy); ctxSky.lineTo(cx + r, cy);
+    ctxSky.moveTo(cx, cy - r); ctxSky.lineTo(cx, cy + r);
+    ctxSky.stroke();
+
+    // 标注
+    ctxSky.fillStyle = "#D4AF37";
+    ctxSky.font = "bold 12px 'Cinzel', serif";
+    ctxSky.fillText("N", cx - 5, cy - r - 5);
+    ctxSky.fillText("E", cx + r + 5, cy + 4);
+    ctxSky.fillText("S", cx - 5, cy + r + 15);
+    ctxSky.fillText("W", cx - r - 15, cy + 4);
+
+    // 绘制卫星
+    sats.forEach(sat => {
+        let radius = r * (90 - sat.el) / 90;
+        let ang = (sat.az - 90) * DEG2RAD;
+        let x = cx + radius * Math.cos(ang);
+        let y = cy + radius * Math.sin(ang);
+
+        let color = sat.type === 'GEO' ? '#FF3333' : (sat.type === 'IGSO' ? '#00FF88' : '#00AAFF');
+        
+        ctxSky.beginPath();
+        ctxSky.fillStyle = color;
+        ctxSky.shadowBlur = 5;
+        ctxSky.shadowColor = color;
+        ctxSky.arc(x, y, 4, 0, 2*PI);
+        ctxSky.fill();
+        ctxSky.shadowBlur = 0;
+
+        ctxSky.fillStyle = "#eee";
+        ctxSky.font = "9px monospace";
+        ctxSky.fillText(sat.prn, x + 6, y + 3);
+    });
+}
+
+function drawTimeChart(data) {
+    let w = canvasChart.width;
+    let h = canvasChart.height;
+    let pad = 35;
+    
+    ctxChart.clearRect(0, 0, w, h);
+    
+    // 坐标轴
+    ctxChart.strokeStyle = "#555";
+    ctxChart.lineWidth = 1;
+    ctxChart.beginPath();
+    ctxChart.moveTo(pad, pad); 
+    ctxChart.lineTo(pad, h - pad); 
+    ctxChart.lineTo(w - pad, h - pad); 
+    ctxChart.stroke();
+
+    // 右Y轴 (PDOP)
+    ctxChart.strokeStyle = "#D4AF37";
+    ctxChart.beginPath();
+    ctxChart.moveTo(w - pad, h - pad);
+    ctxChart.lineTo(w - pad, pad);
+    ctxChart.stroke();
+
+    // 网格与刻度
+    ctxChart.font = "9px monospace";
+    ctxChart.fillStyle = "#888";
+    ctxChart.textAlign = "center";
+    
+    for(let i=0; i<=23; i+=4) {
+        let x = pad + (i / 23) * (w - 2 * pad);
+        ctxChart.fillText(i, x, h - pad + 12);
+    }
+
+    ctxChart.textAlign = "right";
+    for(let i=0; i<=20; i+=5) {
+        let y = (h - pad) - (i / 20) * (h - 2 * pad);
+        ctxChart.fillText(i, pad - 5, y + 3);
+    }
+    
+    ctxChart.textAlign = "left";
+    ctxChart.fillStyle = "#D4AF37";
+    for(let i=0; i<=10; i+=2) {
+        let y = (h - pad) - (i / 10) * (h - 2 * pad);
+        ctxChart.fillText(i, w - pad + 5, y + 3);
+    }
+
+    // 卫星数填充
+    ctxChart.beginPath();
+    let grad = ctxChart.createLinearGradient(0, h-pad, 0, pad);
+    grad.addColorStop(0, "rgba(212, 175, 55, 0.05)");
+    grad.addColorStop(1, "rgba(212, 175, 55, 0.4)");
+    ctxChart.fillStyle = grad;
+    ctxChart.moveTo(pad, h - pad);
+    data.forEach((d, i) => {
+        let x = pad + (i / 23) * (w - 2 * pad);
+        let y = (h - pad) - (d.count / 20) * (h - 2 * pad);
+        ctxChart.lineTo(x, y);
+    });
+    ctxChart.lineTo(w - pad, h - pad);
+    ctxChart.fill();
+    
+    // 卫星数线条
+    ctxChart.beginPath();
+    ctxChart.strokeStyle = "#F4C430"; 
+    ctxChart.lineWidth = 1.5;
+    data.forEach((d, i) => {
+        let x = pad + (i / 23) * (w - 2 * pad);
+        let y = (h - pad) - (d.count / 20) * (h - 2 * pad);
+        if(i===0) ctxChart.moveTo(x, y); else ctxChart.lineTo(x, y);
+    });
+    ctxChart.stroke();
+
+    // PDOP 线条
+    ctxChart.beginPath();
+    ctxChart.strokeStyle = "#FF3333"; 
+    ctxChart.lineWidth = 1.5;
+    data.forEach((d, i) => {
+        let x = pad + (i / 23) * (w - 2 * pad);
+        let val = d.pdop > 10 ? 10 : d.pdop;
+        let y = (h - pad) - (val / 10) * (h - 2 * pad);
+        if (i===0) ctxChart.moveTo(x, y);
+        else ctxChart.lineTo(x, y);
+    });
+    ctxChart.stroke();
+    
+    // 图例
+    ctxChart.font = "bold 9px sans-serif";
+    ctxChart.fillStyle = "#F4C430"; ctxChart.fillText("SAT", pad + 20, pad - 5);
+    ctxChart.fillStyle = "#FF3333"; ctxChart.fillText("PDOP", w - pad - 40, pad - 5);
+}
+
+function drawMap() {
+    let w = canvasMap.width;
+    let h = canvasMap.height;
+    ctxMap.clearRect(0,0,w,h);
+    
+    ctxMap.fillStyle = "#080808";
+    ctxMap.fillRect(0,0,w,h);
+    
+    ctxMap.strokeStyle = "#1a1a1a";
+    ctxMap.lineWidth = 1;
+    for(let i=0; i<w; i+=20) { ctxMap.beginPath(); ctxMap.moveTo(i,0); ctxMap.lineTo(i,h); ctxMap.stroke(); }
+    for(let i=0; i<h; i+=20) { ctxMap.beginPath(); ctxMap.moveTo(0,i); ctxMap.lineTo(w,i); ctxMap.stroke(); }
+
+    let mx = w/2; 
+    let my = h/2;
+    
+    let time = Date.now() / 1500;
+    let r = (time % 1) * 40; // 减小雷达半径
+    let alpha = 1 - (time % 1);
+    
+    ctxMap.beginPath();
+    ctxMap.arc(mx, my, r, 0, 2*PI);
+    ctxMap.strokeStyle = `rgba(212, 175, 55, ${alpha})`;
+    ctxMap.lineWidth = 2;
+    ctxMap.stroke();
+
+    ctxMap.beginPath();
+    ctxMap.arc(mx, my, 3, 0, 2*PI);
+    ctxMap.fillStyle = "#FF3333";
+    ctxMap.shadowBlur = 8;
+    ctxMap.shadowColor = "#FF3333";
+    ctxMap.fill();
+    ctxMap.shadowBlur = 0;
+}
+
+function updateAll() {
+    const dateStr = document.getElementById('datePicker').value;
+    const hour = parseInt(document.getElementById('timeSlider').value);
+    const mask = parseInt(document.getElementById('maskSlider').value);
+
+    document.getElementById('timeVal').innerText = `${hour}:00`;
+    document.getElementById('maskVal').innerText = `${mask}°`;
+
+    let currentDt = new Date(dateStr);
+    let utcHour = hour - 8;
+    currentDt.setUTCHours(utcHour, 0, 0, 0);
+
+    let currentSats = calculateSkyplot(currentDt, mask);
+    let currentDop = calculateDOP(currentSats);
+
+    document.getElementById('satCount').innerText = currentSats.length;
+    document.getElementById('pdopVal').innerText = currentDop.pdop.toFixed(2);
+    document.getElementById('hdopVal').innerText = currentDop.hdop.toFixed(2);
+    document.getElementById('vdopVal').innerText = currentDop.vdop.toFixed(2);
+
+    const msgEl = document.getElementById('romanticMsg');
+    const titleEl = document.getElementById('statusTitle');
+    
+    if (!currentDop.valid || currentDop.pdop > 10) {
+        titleEl.innerText = "WEAK SIGNAL";
+        titleEl.style.color = "#888";
+        msgEl.innerText = "Searching for starlight...";
+    } else if (currentDop.pdop < 2.0) {
+        titleEl.innerText = "OPTIMAL";
+        titleEl.style.color = "#F4C430"; 
+        msgEl.innerText = `${currentSats.length} satellites aligned.`;
+    } else {
+        titleEl.innerText = "GOOD";
+        titleEl.style.color = "#4ecdc4";
+        msgEl.innerText = "Navigation active.";
+    }
+
+    drawSkyplot(currentSats);
+
+    const tbody = document.querySelector('#satTable tbody');
+    tbody.innerHTML = '';
+    currentSats.sort((a,b) => a.prn.localeCompare(b.prn));
+    currentSats.forEach(sat => {
+        let color = sat.type === 'GEO' ? '#FF3333' : (sat.type === 'IGSO' ? '#00FF88' : '#00AAFF');
+        let row = `<tr>
+            <td style="color:${color}; font-weight:bold">${sat.prn}</td>
+            <td>${sat.type}</td>
+            <td>${sat.az.toFixed(0)}</td>
+            <td>${sat.el.toFixed(0)}</td>
+            <td>${(sat.dist/1000).toFixed(0)}</td>
+        </tr>`;
+        tbody.innerHTML += row;
+    });
+
+    let trendData = [];
+    for (let h=0; h<24; h++) {
+        let dt = new Date(dateStr);
+        dt.setUTCHours(h - 8, 0, 0, 0);
+        let sats = calculateSkyplot(dt, mask);
+        let dop = calculateDOP(sats);
+        trendData.push({ hour: h, count: sats.length, pdop: dop.valid ? dop.pdop : 10 });
+    }
+    drawTimeChart(trendData);
+}
+
+function animate() {
+    drawMap();
+    requestAnimationFrame(animate);
+}
+
+window.onload = () => {
+    document.getElementById('datePicker').addEventListener('change', updateAll);
+    document.getElementById('timeSlider').addEventListener('input', updateAll);
+    document.getElementById('maskSlider').addEventListener('input', updateAll);
+    document.getElementById('calcBtn').addEventListener('click', updateAll);
+    
+    // 动态调整Canvas分辨率以匹配CSS尺寸
+    function resizeCanvas() {
+        const sky = document.getElementById('skyplot');
+        // keep square aspect ratio
+        
+        const chart = document.getElementById('timeChart');
+        chart.width = chart.parentElement.clientWidth;
+        chart.height = chart.parentElement.clientHeight;
+        
+        const map = document.getElementById('mapCanvas');
+        map.width = map.parentElement.clientWidth;
+        
+        updateAll();
+    }
+    
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    animate();
+};
+
+</script>
+</body>
+</html>
